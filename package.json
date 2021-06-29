@@ -2,9 +2,11 @@
   "name": "simplicial-complex",
   "version": "1.0.0",
   "description": "JS package to manipulate simplicial complexes",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "watch 'npm run build' ./src"
   },
   "repository": {
     "type": "git",
@@ -15,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/sushovan4/simplicial-complex/issues"
   },
-  "homepage": "https://github.com/sushovan4/simplicial-complex#readme"
+  "homepage": "https://github.com/sushovan4/simplicial-complex#readme",
+  "dependencies": {
+    "watch": "^1.0.2"
+  }
 }
