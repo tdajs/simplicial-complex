@@ -1,22 +1,17 @@
+import { Simplex } from "./simplex";
 import { Vertex } from "./vertex";
 
 class Complex {
     nVertices: number;
-    vertices: Array<Vertex>;
-    simplices: Array<Set<[number]>>;
+    vertices?: Vertex[];
+    simplices: Set<Simplex>[];
 
-    constructor(nVertices: number, vertices?: Array<Vertex>) {
+    constructor(nVertices: number, vertices?: Vertex[]) {
         this.nVertices = nVertices;
-        this.vertices = vertices || new Array<Vertex>(nVertices);
         
-        for(let i=0;i<this.vertices.length;i++) {
-            this.vertices[i] = this.vertices[i] || new Vertex();
-            this.vertices[i].index ||= i;
-        }
-
-        let vertexSet = new Set<[number]>();
+        let vertexSet = new Set<Simplex>();
         for(let i=0;i<nVertices;i++)
-            vertexSet.add([i]);
+            vertexSet.add(new Simplex([i]));
 
         this.simplices = new Array(vertexSet);
     }
@@ -25,50 +20,57 @@ class Complex {
         //
     }
 
-    addSimplex(simplex: [number]) {
-        let dim = simplex.length - 1;
+    addSimplex(simplex: Simplex) {
+        if(simplex.dim() === 0) {
+            // this.addVertex();
+            return;
+        }
 
-        simplex.sort();
-        if(dim === 0 || !this.validSimplex(simplex) || this.hasSimplex(simplex))
+        if(!this.canAdd(simplex)) {
+            console.log('can not add this simplex');
+            return;
+        }
+        
+        if(this.hasSimplex(simplex))
             return;
 
-        for(let i=0;i<=dim;i++) {
-            let face = simplex.slice(0,i) as [number];
-            if(i<dim)
-                face = face.concat(simplex.slice(i-dim)) as [number];
+        for(let face of simplex.faces()) {
             this.addSimplex(face);
         }
-        this.simplices[dim] ||= new Set<[number]>();
-        this.simplices[dim].add(simplex);
+
+        this.simplices[simplex.dim()] ||= new Set<Simplex>();
+        this.simplices[simplex.dim()].add(simplex);
     }
 
-    validSimplex(simplex: [number]) {
-        return simplex.filter(value => 
-            Number.isInteger(value) && 0 <= value && value < this.nVertices)
-            .length === simplex.length
-
+    canAdd(simplex: Simplex) {
+        return false;
     }
 
-    hasSimplex(simplex: [number]) {
+    hasSimplex(simplex: Simplex) {
         let flag = false;
-        let collection = this.simplices[simplex.length - 1];
+        let collection = this.simplices[simplex.vertices.length - 1];
         if(!collection)
             return false;
 
         collection.forEach(key => {
-                if(this.simplexEquals(key,simplex))
-                    flag = true;
+                //if(this.simplexEquals(key,simplex))
+                //    flag = true;
             }
         )
         return flag;
     }
 
-    simplexEquals(a: [number], b: [number]) {
-        return Array.isArray(a) &&
-          Array.isArray(b) &&
-          a.length === b.length &&
-          a.every((val, index) => val === b[index]);
+    hasFaces(simplex: Simplex) {
+        return false;
     }
+
+    flagify( ) {
+        return;
+    }
+
+    ifFlag( ) {
+        return false;
+    } 
 }
 
 export { Complex };
