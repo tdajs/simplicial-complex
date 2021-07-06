@@ -2,24 +2,32 @@ import { Complex } from "./complex";
 
 
 class Simplex {
-    vSet: number[] | [number];
+    vSet: number[];
+    constructor(vSet: number[]) {
+        if(vSet.length === 0)
+            throw new Error('bad simplex');
 
-    constructor(vSet: [number]) {
-        this.vSet = vSet;
+        vSet.sort();
+        let flag = vSet.every( (val,index,arr) => Number.isInteger(val) 
+            && (!arr[index - 1] || arr[index - 1] !== val ));
+        if(flag)
+            this.vSet = vSet;
+        else    
+            throw new Error('bad simplex');
     }
     
     get dim() {
         return this.vSet.length - 1;
     }
 
-    faces(): [Simplex] | Simplex[] { 
+    faces(): Simplex[] { 
         let result = new Array<Simplex>();
         
-        for(let i=0;i<=this.dim;i++) {
+        for(let i = 0; i <= this.dim; i++) {
             let face = this.vSet.slice(0,i);
             
-            if(i<this.dim)
-                face = face.concat(this.vSet.slice(i-this.dim));
+            if(i < this.dim)
+                face = face.concat(this.vSet.slice(i - this.dim));
             
             result.push(new Simplex(face as [number]));
         }
@@ -32,13 +40,6 @@ class Simplex {
         this.vSet.length === simplex.vSet.length &&
         this.vSet.every((val, index) => val === simplex.vSet[index]);
     };
-    
-    validFor(complex: Complex) {
-        return this.vSet.filter(value => 
-            Number.isInteger(value) && 0 <= value && value < complex.nVertices)
-            .length === this.vSet.length
-    }
-        // equalsUptoOrientation( ) { }
 }
 
 
