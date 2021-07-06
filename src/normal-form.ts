@@ -253,7 +253,7 @@ function copyMat(mat: number[][]) {
     });
 }
 
-function printMat(mat: number[][]) {
+export function printMat(mat: number[][]) {
     for(let row of mat)
         console.log(row.join(' '));
 }
