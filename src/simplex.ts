@@ -1,48 +1,45 @@
 import { Complex } from "./complex";
 
+
 class Simplex {
-    vertices: [number];
+    vSet: number[] | [number];
 
-    constructor(vertices: [number]) {
-        // vertices.sort();
-        this.vertices = vertices;
-    }
-
-    dim( ) {
-        return this.vertices.length - 1;
+    constructor(vSet: [number]) {
+        this.vSet = vSet;
     }
     
-    sort( ) {
-        this.vertices.sort();
+    get dim() {
+        return this.vSet.length - 1;
     }
 
-    faces(dim?: number): Set<Simplex> { 
-        let result: Set<Simplex> = new Set<Simplex>();
+    faces(): [Simplex] | Simplex[] { 
+        let result = new Array<Simplex>();
         
-        for(let i=0;i<=this.dim();i++) {
-            let face = this.vertices.slice(0,i);
-            if(i<this.dim())
-                face = face.concat(this.vertices.slice(i-this.dim()));
+        for(let i=0;i<=this.dim;i++) {
+            let face = this.vSet.slice(0,i);
             
-            result.add(new Simplex(face as [number]));
+            if(i<this.dim)
+                face = face.concat(this.vSet.slice(i-this.dim));
+            
+            result.push(new Simplex(face as [number]));
         }
         return result;
     };
-
-
+    
     equals(simplex: Simplex) { 
-        return Array.isArray(this.vertices) &&
-        Array.isArray(simplex.vertices) &&
-        this.vertices.length === simplex.vertices.length &&
-        this.vertices.every((val, index) => val === simplex.vertices[index]);
+        return Array.isArray(this.vSet) &&
+        Array.isArray(simplex.vSet) &&
+        this.vSet.length === simplex.vSet.length &&
+        this.vSet.every((val, index) => val === simplex.vSet[index]);
     };
-
+    
     validFor(complex: Complex) {
-        return this.vertices.filter(value => 
+        return this.vSet.filter(value => 
             Number.isInteger(value) && 0 <= value && value < complex.nVertices)
-            .length === this.vertices.length
+            .length === this.vSet.length
     }
-    // equalsUptoOrientation( ) { }
+        // equalsUptoOrientation( ) { }
 }
+
 
 export { Simplex };

@@ -21,7 +21,7 @@ class Complex {
     }
 
     addSimplex(simplex: Simplex) {
-        if(simplex.dim() === 0) {
+        if(simplex.dim === 0) {
             // this.addVertex();
             return;
         }
@@ -38,8 +38,8 @@ class Complex {
             this.addSimplex(face);
         }
 
-        this.simplices[simplex.dim()] ||= new Set<Simplex>();
-        this.simplices[simplex.dim()].add(simplex);
+        this.simplices[simplex.dim] ||= new Set<Simplex>();
+        this.simplices[simplex.dim].add(simplex);
     }
 
     canAdd(simplex: Simplex) {
@@ -48,7 +48,7 @@ class Complex {
 
     hasSimplex(simplex: Simplex) {
         let flag = false;
-        let collection = this.simplices[simplex.vertices.length - 1];
+        let collection = this.simplices[simplex.vSet.length - 1];
         if(!collection)
             return false;
 
@@ -62,10 +62,6 @@ class Complex {
 
     hasFaces(simplex: Simplex) {
         return false;
-    }
-
-    flagify( ) {
-        return;
     }
 
     ifFlag( ) {
