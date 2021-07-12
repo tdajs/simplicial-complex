@@ -19,6 +19,11 @@
   },
   "homepage": "https://github.com/sushovan4/simplicial-complex#readme",
   "dependencies": {
+    "numjs": "git+https://github.com/nicolaspanel/numjs.git"
+  },
+  "devDependencies": {
+    "@types/numjs": "^0.16.0",
+    "typescript": "^4.3.5",
     "watch": "^1.0.2"
   }
 }

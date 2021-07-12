@@ -1,6 +1,5 @@
 import { Complex } from "./complex";
 
-
 class Simplex {
     vSet: number[];
     constructor(vSet: number[]) {
