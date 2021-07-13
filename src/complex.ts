@@ -1,44 +1,22 @@
 import { Simplex } from "./simplex";
 import { Vertex } from "./vertex";
+import * as nj from "numjs";
 import { NormalForm } from './normal-form';
 
 class Complex {
-    nVertices: number;
     vertices?: Vertex[];
     simplices: Simplex[][];
 
-    constructor(nVertices: number, vertices?: Vertex[]) {
-        this.nVertices = nVertices;
+    constructor(vertices?: Vertex[]) {
+        this.vertices = vertices;
         this.simplices = new Array<Simplex[]>();
-        
-        let vertexSet = new Array<Simplex>();
-        for(let i = 0; i < nVertices; i++)
-            vertexSet.push(new Simplex([i]));
-        this.simplices.push(vertexSet);    
     }
 
-    get dim() {
+    get dim(): number {
         return this.simplices.length;
     }
 
-    addVertex( ) {
-        //
-    }
-
-    addSimplex(simplex: Simplex | number[]) {
-        if(Array.isArray(simplex))
-            simplex = new Simplex(simplex);
-
-        if(simplex.dim === 0) {
-            // this.addVertex();
-            return;
-        }
-
-        if(!this.valid(simplex)) {
-            console.log('simplex is not valid.');
-            return;
-        }
-        
+    addSimplex(simplex: Simplex): void {
         if(this.hasSimplex(simplex)) {
             return;
         }
@@ -49,49 +27,38 @@ class Complex {
 
         this.simplices[simplex.dim] ||= new Array<Simplex>();
         this.simplices[simplex.dim].push(simplex);
+        return;
     }
 
-    
-    valid(simplex: Simplex) {
-        return simplex.vSet.every( value => 0 <= value && value < this.nVertices );
-    }
-
-    hasSimplex(simplex: Simplex) {
+    indexOf(simplex: Simplex): number {
         let simplices = this.simplices[simplex.dim];
         if(!simplices)
+            return -1;
+        return simplices.findIndex(simp => simp.equals(simplex));
+    }
+
+    hasSimplex(simplex: Simplex): boolean {
+        if(this.indexOf(simplex) === -1)
             return false;
-        
-        for(let i = 0; i < simplices.length; i++) {
-            if(simplex.equals(simplices[i]))
-                return i;
-        }
-        return false;
+        return true;
     }
 
     bdMat(dim: number) {
         if((!this.simplices[dim] || this.simplices[dim].length === 0) ||
             (!this.simplices[dim - 1] || this.simplices[dim - 1].length === 0))
             throw new Error('dimension not valid.')
-        let n = this.simplices[dim -1].length;
-        let m = this.simplices[dim].length;
-        
-        let mat = new Array<number[]>(n);
-        for(let i = 0; i < n; i++) {
-            mat[i] = new Array<number>(m);
-            for( let j = 0; j < m; j++) {
-                mat[i][j] = 0;
-            }
-        }
 
-        for(let j = 0; j < m; j++) {
-            let simplex = this.simplices[dim][j];
-            let faces = simplex.faces();
-            for(let k = 0; k < faces.length; k++) {
-                let i = this.hasSimplex(faces[k]);
-                if(i || i === 0)
-                    mat[i][j] = Math.pow(-1,k);
-            }
-        }
+        let mat = nj.zeros([
+            this.simplices[dim -1].length,
+            this.simplices[dim].length
+        ]);
+
+        this.simplices[dim].forEach( (simplex,j) => {
+            simplex.faces().forEach( (face,k) => {
+                mat.set(this.indexOf(face),j,Math.pow(-1,k));
+            });
+        });
+
         return mat;
     }
 }

@@ -1,45 +1,60 @@
-import { Complex } from "./complex";
+class Simplex extends Array<number> {    
 
-class Simplex {
-    vSet: number[];
-    constructor(vSet: number[]) {
+    constructor(vSet: number[]) {        
         if(vSet.length === 0)
             throw new Error('bad simplex');
-
-        vSet.sort();
-        let flag = vSet.every( (val,index,arr) => Number.isInteger(val) 
-            && (!arr[index - 1] || arr[index - 1] !== val ));
-        if(flag)
-            this.vSet = vSet;
+        
+        vSet.sort((num1, num2) => {
+            if(num1 < num2)
+                return -1;
+            else if(num1 > num2)
+                return +1;
+            else
+                return 0;    
+        });
+        
+        let is_distinct = vSet.every( (val,index,arr) => Number.isInteger(val) 
+                    && (!arr[index - 1] || arr[index - 1] !== val ));
+        if(is_distinct) {
+            if(vSet.length === 1) {
+                super(1);
+                this[0] = vSet[0];
+            }
+            else {
+                super(...vSet);
+            }
+        }
         else    
             throw new Error('bad simplex');
     }
     
-    get dim() {
-        return this.vSet.length - 1;
+    static get [Symbol.species]() {
+        return Array;
     }
 
-    faces(): Simplex[] { 
+    get dim() {
+        return this.length - 1;
+    }
+
+    faces() { 
+        if(this.dim === 0)
+            return [];
+
         let result = new Array<Simplex>();
-        
         for(let i = 0; i <= this.dim; i++) {
-            let face = this.vSet.slice(0,i);
-            
+            let face = this.slice(0,i);
             if(i < this.dim)
-                face = face.concat(this.vSet.slice(i - this.dim));
-            
-            result.push(new Simplex(face as [number]));
+                face = face.concat(this.slice(i - this.dim));
+            result.push(new Simplex(face));
         }
         return result;
     };
     
     equals(simplex: Simplex) { 
-        return Array.isArray(this.vSet) &&
-        Array.isArray(simplex.vSet) &&
-        this.vSet.length === simplex.vSet.length &&
-        this.vSet.every((val, index) => val === simplex.vSet[index]);
+        return Array.isArray(this) &&
+            Array.isArray(simplex) &&
+            this.length === simplex.length &&
+            this.every((val, index) => val === simplex[index]);
     };
 }
-
-
 export { Simplex };

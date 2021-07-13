@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "JS package to manipulate simplicial complexes",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@types/numjs": "^0.16.0",
+    "minify": "^7.0.2",
     "typescript": "^4.3.5",
     "watch": "^1.0.2"
   }
