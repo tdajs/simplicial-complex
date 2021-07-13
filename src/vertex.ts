@@ -1,13 +1,8 @@
 import { Point } from './point';
 
-class Vertex {
+interface Vertex {
     location?: Point;
-    index: number;
 
-    constructor(index: number, location?: Point){
-        this.index = index;
-        this.location = location;
-    }
 }
 
 export { Vertex }

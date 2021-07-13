@@ -3,3 +3,4 @@ export { Vertex } from './vertex';
 export { Point } from './point';
 export { Simplex } from './simplex';
 export { NormalForm } from './normal-form';
+export { mat2Tex } from './utils';

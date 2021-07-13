@@ -4,20 +4,41 @@ import * as nj from "numjs";
 import { NormalForm } from './normal-form';
 
 class Complex {
-    vertices?: Vertex[];
+    vertices: Vertex[];
     simplices: Simplex[][];
 
-    constructor(vertices?: Vertex[]) {
-        this.vertices = vertices;
+    constructor(n: number, vertices?: Vertex[]) {
+        this.vertices = vertices || Array<Vertex>(n);
         this.simplices = new Array<Simplex[]>();
+        this.simplices[0] = new Array<Simplex>();
+        for(let i = 0; i < this.n; i++)
+            this.simplices[0].push(new Simplex([i]));
+    }
+
+    get n() {
+        return this.vertices.length;
     }
 
     get dim(): number {
         return this.simplices.length;
     }
 
-    addSimplex(simplex: Simplex): void {
+    addVertex(index: number) {
+        if(!Number.isInteger(index) || index < 0 || index < this.n)
+            return;
+
+        this.vertices.concat(new Array<Vertex>(index - this.n + 1));
+        for(let i = this.n; i <= index ; i++)
+            this.simplices[0].push(new Simplex([i]));
+    }
+
+    addSimplex(simplex: Simplex) {
         if(this.hasSimplex(simplex)) {
+            return;
+        }
+
+        if(simplex.dim === 0) {
+            this.addVertex(simplex[0]);
             return;
         }
 
@@ -27,7 +48,7 @@ class Complex {
 
         this.simplices[simplex.dim] ||= new Array<Simplex>();
         this.simplices[simplex.dim].push(simplex);
-        return;
+        return this;
     }
 
     indexOf(simplex: Simplex): number {
