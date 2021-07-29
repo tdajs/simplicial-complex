@@ -1,14 +1,11 @@
 import { Simplex } from "./simplex";
-import { Vertex } from "./vertex";
-import * as nj from "numjs";
-import { NormalForm } from './normal-form';
 
 class Complex {
-    vertices: Vertex[];
+    vertices: any[];
     simplices: Simplex[][];
 
-    constructor(n: number, vertices?: Vertex[]) {
-        this.vertices = vertices || Array<Vertex>(n);
+    constructor(vertices?: any[]) {
+        this.vertices = vertices || Array();
         this.simplices = new Array<Simplex[]>();
         this.simplices[0] = new Array<Simplex>();
         for(let i = 0; i < this.n; i++)
@@ -23,45 +20,50 @@ class Complex {
         return this.simplices.length;
     }
 
-    addVertex(index: number) {
-        if(!Number.isInteger(index) || index < 0 || index < this.n)
-            return;
+    facesOf(simplex: Simplex) {
+        const s = this.simplices[simplex.dim].find(s => s === simplex );
+        
+        if(!s)
+            throw new Error('Simplex does not exist');
+        
+        if(simplex.dim === 0)
+            return [];
 
-        this.vertices.concat(new Array<Vertex>(index - this.n + 1));
-        for(let i = this.n; i <= index ; i++)
-            this.simplices[0].push(new Simplex([i]));
+        return simplex.faces.map( vSet => 
+            this.simplices[simplex.dim - 1].find( s => s.hasVSet(vSet) )
+        );
     }
 
-    addSimplex(simplex: Simplex) {
-        if(this.hasSimplex(simplex)) {
-            return;
+    add(simplex: Simplex | number[]) {
+        if(Array.isArray(simplex))
+            simplex = new Simplex(simplex);
+        
+        let s = this.findSimplex(simplex.vSet);
+        if(s) {
+            s = simplex;
+            return this;
         }
 
+        if(!simplex.faces.every( face => this.findSimplex(face)))
+            throw new Error('Face does not exist');
+        
         if(simplex.dim === 0) {
-            this.addVertex(simplex[0]);
-            return;
+            const idx = simplex.vSet[0];
+            this.vertices = 
+                this.vertices.concat(new Array(idx - this.n + 1));
+            for(let i = this.n; i < idx; i++)
+                this.simplices[0].push(new Simplex([i]));
         }
-
-        for(let face of simplex.faces()) {
-            this.addSimplex(face);
-        }
+        
 
         this.simplices[simplex.dim] ||= new Array<Simplex>();
         this.simplices[simplex.dim].push(simplex);
         return this;
     }
-
-    indexOf(simplex: Simplex): number {
-        let simplices = this.simplices[simplex.dim];
-        if(!simplices)
-            return -1;
-        return simplices.findIndex(simp => simp.equals(simplex));
-    }
-
-    hasSimplex(simplex: Simplex): boolean {
-        if(this.indexOf(simplex) === -1)
-            return false;
-        return true;
+    
+    findSimplex(vSet: number[]) {
+        const simplices = this.simplices[vSet.length - 1];
+        return simplices && simplices.find(simp => simp.hasVSet(vSet));
     }
 
     bdMat(dim: number) {
@@ -69,14 +71,13 @@ class Complex {
             (!this.simplices[dim - 1] || this.simplices[dim - 1].length === 0))
             throw new Error('dimension not valid.')
 
-        let mat = nj.zeros([
-            this.simplices[dim -1].length,
-            this.simplices[dim].length
-        ]);
+        let mat = Array(this.simplices[dim -1].length).fill(
+            Array(this.simplices[dim].length).fill(0)
+        );
 
-        this.simplices[dim].forEach( (simplex,j) => {
-            simplex.faces().forEach( (face,k) => {
-                mat.set(this.indexOf(face),j,Math.pow(-1,k));
+        this.simplices[dim].forEach( (simplex, j) => {
+            this.facesOf(simplex).forEach( (face,k) => {
+                //mat[this.indexOf(face)][j] = Math.pow(-1,k);
             });
         });
 
