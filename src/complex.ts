@@ -1,4 +1,5 @@
 import { Simplex } from "./simplex";
+import { choose, dist } from "./utils";
 
 class Complex {
     vertices: any[];
@@ -24,14 +25,14 @@ class Complex {
         const s = this.simplices[simplex.dim].find(s => s === simplex );
         
         if(!s)
-            throw new Error('Simplex does not exist');
+            throw new Error('simplex does not exist.');
         
         if(simplex.dim === 0)
             return [];
 
         return simplex.faces.map( vSet => 
             this.simplices[simplex.dim - 1].find( s => s.hasVSet(vSet) )
-        );
+        ) as Simplex[];            
     }
 
     add(simplex: Simplex | number[]) {
@@ -45,14 +46,14 @@ class Complex {
         }
 
         if(!simplex.faces.every( face => this.findSimplex(face)))
-            throw new Error('Face does not exist');
+            throw new Error('Face does not exist.');
         
         if(simplex.dim === 0) {
             const idx = simplex.vSet[0];
-            this.vertices = 
-                this.vertices.concat(new Array(idx - this.n + 1));
             for(let i = this.n; i < idx; i++)
                 this.simplices[0].push(new Simplex([i]));
+            this.vertices = 
+                this.vertices.concat(new Array(idx - this.n + 1));
         }
         
 
@@ -77,12 +78,54 @@ class Complex {
 
         this.simplices[dim].forEach( (simplex, j) => {
             this.facesOf(simplex).forEach( (face,k) => {
-                //mat[this.indexOf(face)][j] = Math.pow(-1,k);
+                const idx = this.simplices[dim - 1].indexOf(face);
+                mat[idx][j] = Math.pow(-1,k);
             });
         });
-
         return mat;
     }
+
+    static rips(vertices: number[][], scale: number, distMat: number[][] = Array<number[]>(),  distance?: string) {
+        if(distMat.length === 0) {
+            distMat = Array(vertices.length).fill(0).map( (r,i) => {
+                return Array(vertices.length).fill(0).map( (c,j) => {
+                    return dist(vertices[i], vertices[j]);
+                });
+            });
+        }
+        
+        const complex = new Complex(vertices);
+        
+        for(let i = 0; i < distMat.length; i++)
+            for(let j = 0; j < i; j++) {
+                if(distMat[i][j] <= scale) {
+                    complex.add([i,j]);
+                }
+            }
+
+        const idxSet = vertices.map((e,i) => i);
+        let dim = 1;
+        while(dim < complex.n - 1 && complex.simplices[dim] 
+                && complex.simplices[dim].length !== 0) {
+            dim += 1;
+
+            const simplices = choose(idxSet, dim + 1).filter( combo => {
+                return new Simplex(combo)
+                .faces
+                .every( face => complex.findSimplex(face) )
+            });
+            
+            simplices.forEach( simplex => complex.add(simplex));
+        }
+        return complex; 
+    }
+
+    static cech() {
+
+    }
+    // realizationOf(simplex: Simplex) {
+    // 
+    // }
 }
 
 export { Complex };

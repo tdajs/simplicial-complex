@@ -1,12 +1,13 @@
 class Simplex {    
     vSet: number[];
-    labels?: string[];
+    label?: string;
+
 
     constructor(vSet: number[], 
-        opts?: {labels?: string[]}) {        
+        opts?: {label?: string}) {        
         
         if(vSet.length === 0)
-            throw new Error('bad simplex');
+            throw new Error('bad simplex.');
         
         vSet.sort((num1, num2) => {
             if(num1 < num2)
@@ -20,10 +21,10 @@ class Simplex {
         const is_distinct = vSet.every( (val,index,arr) => Number.isInteger(val) 
                     && (!arr[index - 1] || arr[index - 1] !== val ));
         if(!is_distinct)
-            throw new Error('bad simplex');
+            throw new Error('bad simplex.');
         
         this.vSet = vSet;
-        this.labels = opts?.labels;
+        this.label = opts?.label;
     }
 
     get dim() {
