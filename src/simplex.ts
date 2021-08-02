@@ -1,13 +1,13 @@
 class Simplex {    
     vSet: number[];
     label?: string;
-
+    vertices?: any[];
 
     constructor(vSet: number[], 
-        opts?: {label?: string}) {        
+        opts?: {label?: string, vertices?: any}) {        
         
-        if(vSet.length === 0)
-            throw new Error('bad simplex.');
+        if(!vSet || vSet.length === 0)
+            throw new Error('vertex set required.');
         
         vSet.sort((num1, num2) => {
             if(num1 < num2)
@@ -25,6 +25,8 @@ class Simplex {
         
         this.vSet = vSet;
         this.label = opts?.label;
+        this.vertices = opts?.vertices;
+
     }
 
     get dim() {

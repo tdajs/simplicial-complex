@@ -2,19 +2,20 @@ import { Simplex } from "./simplex";
 import { choose, dist } from "./utils";
 
 class Complex {
-    vertices: any[];
     simplices: Simplex[][];
 
     constructor(vertices?: any[]) {
-        this.vertices = vertices || Array();
         this.simplices = new Array<Simplex[]>();
         this.simplices[0] = new Array<Simplex>();
-        for(let i = 0; i < this.n; i++)
-            this.simplices[0].push(new Simplex([i]));
+
+        if(vertices && Array.isArray(vertices)) {
+            for(let i = 0; i < vertices.length; i++)
+                this.simplices[0].push(new Simplex([i], {vertices: vertices[i]} ));
+        }
     }
 
     get n() {
-        return this.vertices.length;
+        return this.simplices[0].length;
     }
 
     get dim(): number {
@@ -39,25 +40,23 @@ class Complex {
         if(Array.isArray(simplex))
             simplex = new Simplex(simplex);
         
-        let s = this.findSimplex(simplex.vSet);
-        if(s) {
-            s = simplex;
+        if(this.findSimplex(simplex.vSet))
             return this;
-        }
 
-        if(!simplex.faces.every( face => this.findSimplex(face)))
-            throw new Error('Face does not exist.');
-        
         if(simplex.dim === 0) {
             const idx = simplex.vSet[0];
             for(let i = this.n; i < idx; i++)
                 this.simplices[0].push(new Simplex([i]));
-            this.vertices = 
-                this.vertices.concat(new Array(idx - this.n + 1));
         }
         
+        
+        simplex.faces
+            .filter( f => !this.findSimplex(f) )
+            .map( f=> this.add(f) )
+        ;
 
         this.simplices[simplex.dim] ||= new Array<Simplex>();
+        simplex.vertices ||= simplex.vSet.map( v => this.simplices[0][v].vertices); 
         this.simplices[simplex.dim].push(simplex);
         return this;
     }
@@ -72,14 +71,13 @@ class Complex {
             (!this.simplices[dim - 1] || this.simplices[dim - 1].length === 0))
             throw new Error('dimension not valid.')
 
-        let mat = Array(this.simplices[dim -1].length).fill(
-            Array(this.simplices[dim].length).fill(0)
-        );
-
+        let mat = Array(this.simplices[dim -1].length).fill(0)
+            .map( r => Array(this.simplices[dim].length).fill(0) );
+        
         this.simplices[dim].forEach( (simplex, j) => {
             this.facesOf(simplex).forEach( (face,k) => {
-                const idx = this.simplices[dim - 1].indexOf(face);
-                mat[idx][j] = Math.pow(-1,k);
+                const i = this.simplices[dim - 1].indexOf(face);
+                    mat[i][j] = Math.pow(-1,k);
             });
         });
         return mat;
@@ -123,9 +121,6 @@ class Complex {
     static cech() {
 
     }
-    // realizationOf(simplex: Simplex) {
-    // 
-    // }
 }
 
 export { Complex };
