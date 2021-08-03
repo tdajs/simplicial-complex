@@ -1,10 +1,12 @@
+import { Complex } from "./complex";
+
 class Simplex {    
     vSet: number[];
     label?: string;
-    vertices?: any[];
+    vertices?: any;
 
     constructor(vSet: number[], 
-        opts?: {label?: string, vertices?: any}) {        
+        opts?: {label?: string, vertices: any[]}) {        
         
         if(!vSet || vSet.length === 0)
             throw new Error('vertex set required.');
@@ -26,7 +28,15 @@ class Simplex {
         this.vSet = vSet;
         this.label = opts?.label;
         this.vertices = opts?.vertices;
+    }
 
+        
+    getVerticesFrom(complex: Complex) {
+        if(!complex.findSimplex(this.vSet)) 
+            throw new Error('simplex does not belong to complex.');
+            
+        return this.vertices ||
+            this.vSet.map( v => complex.simplices[0][v].vertices[0] );
     }
 
     get dim() {

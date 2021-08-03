@@ -10,7 +10,7 @@ class Complex {
 
         if(vertices && Array.isArray(vertices)) {
             for(let i = 0; i < vertices.length; i++)
-                this.simplices[0].push(new Simplex([i], {vertices: vertices[i]} ));
+                this.simplices[0].push(new Simplex([i], {vertices: [vertices[i]]} ));
         }
     }
 
@@ -45,10 +45,10 @@ class Complex {
 
         if(simplex.dim === 0) {
             const idx = simplex.vSet[0];
-            for(let i = this.n; i < idx; i++)
+            for(let i = this.n; i < idx - 1; i++) {
                 this.simplices[0].push(new Simplex([i]));
+            }
         }
-        
         
         simplex.faces
             .filter( f => !this.findSimplex(f) )
@@ -56,11 +56,10 @@ class Complex {
         ;
 
         this.simplices[simplex.dim] ||= new Array<Simplex>();
-        simplex.vertices ||= simplex.vSet.map( v => this.simplices[0][v].vertices); 
         this.simplices[simplex.dim].push(simplex);
         return this;
     }
-    
+
     findSimplex(vSet: number[]) {
         const simplices = this.simplices[vSet.length - 1];
         return simplices && simplices.find(simp => simp.hasVSet(vSet));

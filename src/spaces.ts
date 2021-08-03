@@ -43,10 +43,8 @@ export class Spaces {
         ];
 
         const complex = new Complex(vertices)
-            .add(new Simplex([0,1], { label: "e_0"}))
-            .add(new Simplex([0,2], { label: "e_2"}))
-            .add(new Simplex([0,1,2], {label: "t"}));
 
+        
         return [complex, [], this.triangles(complex)];
     }
 
