@@ -4,9 +4,11 @@ class Simplex {
     vSet: number[];
     label?: string;
     vertices?: any;
+    anchor?: string; 
+    offset?: number;
 
     constructor(vSet: number[], 
-        opts?: {label?: string, vertices: any[]}) {        
+        opts?: {label?: string, vertices?: any[], anchor?: string, offset?: number}) {        
         
         if(!vSet || vSet.length === 0)
             throw new Error('vertex set required.');
@@ -28,6 +30,8 @@ class Simplex {
         this.vSet = vSet;
         this.label = opts?.label;
         this.vertices = opts?.vertices;
+        this.anchor = opts?.anchor;
+        this.offset = opts?.offset;
     }
 
         
