@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  app:
+    build: .
+    environment: 
+      TERM: xterm
+    command: npm run watch
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
