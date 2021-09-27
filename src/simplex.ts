@@ -1,50 +1,34 @@
-import { Complex } from "./complex";
-
-class Simplex {    
-    vSet: number[];
-    label?: string;
-    vertices?: any;
-    anchor?: string; 
-    offset?: number;
-
-    constructor(vSet: number[], 
-        opts?: {label?: string, vertices?: any[], anchor?: string, offset?: number}) {        
-        
+export class Simplex extends Array<number> {    
+    constructor(vSet: number[]) {        
         if(!vSet || vSet.length === 0)
             throw new Error('vertex set required.');
         
         vSet.sort((num1, num2) => {
             if(num1 < num2)
-                return -1;
+            return -1;
             else if(num1 > num2)
-                return +1;
+            return +1;
             else
-                return 0;    
+            return 0;    
         });
         
         const is_distinct = vSet.every( (val,index,arr) => Number.isInteger(val) 
-                    && (!arr[index - 1] || arr[index - 1] !== val ));
+            && (!arr[index - 1] || arr[index - 1] !== val ));
+    
         if(!is_distinct)
             throw new Error('bad simplex.');
-        
-        this.vSet = vSet;
-        this.label = opts?.label;
-        this.vertices = opts?.vertices;
-        this.anchor = opts?.anchor;
-        this.offset = opts?.offset;
+
+        vSet.push(-1);
+        super(...vSet);
+        this.pop();
     }
 
-        
-    getVerticesFrom(complex: Complex) {
-        if(!complex.findSimplex(this.vSet)) 
-            throw new Error('simplex does not belong to complex.');
-            
-        return this.vertices ||
-            this.vSet.map( v => complex.simplices[0][v].vertices[0] );
+    static get [Symbol.species]() {
+        return Array;
     }
 
     get dim() {
-        return this.vSet.length - 1;
+        return this.length - 1;
     }
 
     get faces() { 
@@ -53,19 +37,18 @@ class Simplex {
 
         let result = new Array<number[]>();
         for(let i = 0; i <= this.dim; i++) {
-            let face = this.vSet.slice(0,i);
+            let face = this.slice(0,i);
             if(i < this.dim)
-                face = face.concat(this.vSet.slice(i - this.dim));
+                face = face.concat(this.slice(i - this.dim));
             result.push(face);
         }
         return result;
     };
     
-    hasVSet(vSet: number[]) { 
-        return Array.isArray(this.vSet) &&
-            Array.isArray(vSet) &&
-            this.vSet.length === vSet.length &&
-            this.vSet.every((val, index) => val === vSet[index]);
+    equals(simplex: number[]) { 
+        return Array.isArray(this) &&
+            Array.isArray(simplex) &&
+            this.length === simplex.length &&
+            this.every((val, index) => val === simplex[index]);
     };
 }
-export { Simplex };

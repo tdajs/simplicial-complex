@@ -10,7 +10,7 @@ class Complex {
 
         if(vertices && Array.isArray(vertices)) {
             for(let i = 0; i < vertices.length; i++)
-                this.simplices[0].push(new Simplex([i], {vertices: [vertices[i]]} ));
+                this.simplices[0].push(new Simplex([i]));
         }
     }
 
@@ -32,19 +32,19 @@ class Complex {
             return [];
 
         return simplex.faces.map( vSet => 
-            this.simplices[simplex.dim - 1].find( s => s.hasVSet(vSet) )
-        ) as Simplex[];            
+            this.simplices[simplex.dim - 1].find( s => s.equals(vSet) )
+        ) as Simplex[];
     }
 
-    add(simplex: Simplex | number[]) {
+    add(simplex: Simplex) {
         if(Array.isArray(simplex))
             simplex = new Simplex(simplex);
         
-        if(this.findSimplex(simplex.vSet))
+        if(this.findSimplex(simplex))
             return this;
 
         if(simplex.dim === 0) {
-            const idx = simplex.vSet[0];
+            const idx = simplex[0];
             for(let i = this.n; i < idx - 1; i++) {
                 this.simplices[0].push(new Simplex([i]));
             }
@@ -52,7 +52,7 @@ class Complex {
         
         simplex.faces
             .filter( f => !this.findSimplex(f) )
-            .map( f=> this.add(f) )
+            .map( f=> this.add(new Simplex(f)) )
         ;
 
         this.simplices[simplex.dim] ||= new Array<Simplex>();
@@ -62,7 +62,7 @@ class Complex {
 
     findSimplex(vSet: number[]) {
         const simplices = this.simplices[vSet.length - 1];
-        return simplices && simplices.find(simp => simp.hasVSet(vSet));
+        return simplices && simplices.find(simp => simp.equals(vSet));
     }
 
     bdMat(dim: number) {
@@ -96,7 +96,7 @@ class Complex {
         for(let i = 0; i < distMat.length; i++)
             for(let j = 0; j < i; j++) {
                 if(distMat[i][j] <= scale) {
-                    complex.add([i,j]);
+                    complex.add(new Simplex([i,j]));
                 }
             }
 
@@ -110,15 +110,11 @@ class Complex {
                 return new Simplex(combo)
                 .faces
                 .every( face => complex.findSimplex(face) )
-            });
+            }) as Simplex[];
             
             simplices.forEach( simplex => complex.add(simplex));
         }
         return complex; 
-    }
-
-    static cech() {
-
     }
 }
 
