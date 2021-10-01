@@ -18,9 +18,9 @@
   "author": "Sushovan Majhi",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/sushovan4/simplicial-complex/issues"
+    "url": "https://github.com/tdajs/simplicial-complex/issues"
   },
-  "homepage": "https://github.com/sushovan4/simplicial-complex#readme",
+  "homepage": "https://github.com/tdajs/simplicial-complex#readme",
   "dependencies": {
     "@tdajs/normal-form": "^2.1.1"
   },

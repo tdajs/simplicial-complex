@@ -4,14 +4,12 @@ import { choose, dist } from "./utils";
 class Complex {
     simplices: Simplex[][];
 
-    constructor(vertices?: any[]) {
+    constructor(n?: number) {
         this.simplices = new Array<Simplex[]>();
         this.simplices[0] = new Array<Simplex>();
 
-        if(vertices && Array.isArray(vertices)) {
-            for(let i = 0; i < vertices.length; i++)
-                this.simplices[0].push(new Simplex([i]));
-        }
+        for(let i = 0; i < (n || 0); i++)
+            this.simplices[0].push(new Simplex([i]));
     }
 
     get n() {
@@ -19,51 +17,39 @@ class Complex {
     }
 
     get dim(): number {
-        return this.simplices.length;
+        return this.simplices.length - 1;
     }
-
-    facesOf(simplex: Simplex) {
-        const s = this.simplices[simplex.dim].find(s => s === simplex );
+    
+    findIndex(simplex: Simplex) {
+        if(!this.simplices[simplex.dim])
+            return -1;
         
-        if(!s)
-            throw new Error('simplex does not exist.');
-        
-        if(simplex.dim === 0)
-            return [];
-
-        return simplex.faces.map( vSet => 
-            this.simplices[simplex.dim - 1].find( s => s.equals(vSet) )
-        ) as Simplex[];
+        return this.simplices[simplex.dim].findIndex(s => s.equals(simplex));
     }
-
+    
     add(simplex: Simplex) {
         if(Array.isArray(simplex))
-            simplex = new Simplex(simplex);
+        simplex = new Simplex(simplex);
         
-        if(this.findSimplex(simplex))
-            return this;
-
+        if(this.findIndex(simplex) !== -1)
+        return this;
+        
         if(simplex.dim === 0) {
             const idx = simplex[0];
-            for(let i = this.n; i < idx - 1; i++) {
+            for(let i = this.n; i < idx; i++) {
                 this.simplices[0].push(new Simplex([i]));
             }
         }
         
         simplex.faces
-            .filter( f => !this.findSimplex(f) )
-            .map( f=> this.add(new Simplex(f)) )
+        .filter( f => this.findIndex(f) === -1)
+        .map( f=> this.add(new Simplex(f)) )
         ;
-
+        
         this.simplices[simplex.dim] ||= new Array<Simplex>();
         this.simplices[simplex.dim].push(simplex);
         return this;
-    }
-
-    findSimplex(vSet: number[]) {
-        const simplices = this.simplices[vSet.length - 1];
-        return simplices && simplices.find(simp => simp.equals(vSet));
-    }
+    }    
 
     bdMat(dim: number) {
         if((!this.simplices[dim] || this.simplices[dim].length === 0) ||
@@ -72,11 +58,10 @@ class Complex {
 
         let mat = Array(this.simplices[dim -1].length).fill(0)
             .map( r => Array(this.simplices[dim].length).fill(0) );
-        
+            
         this.simplices[dim].forEach( (simplex, j) => {
-            this.facesOf(simplex).forEach( (face,k) => {
-                const i = this.simplices[dim - 1].indexOf(face);
-                    mat[i][j] = Math.pow(-1,k);
+            simplex.faces.forEach( (face, k) => {
+                mat[this.findIndex(face)][j] = Math.pow(-1, k);
             });
         });
         return mat;
@@ -91,7 +76,7 @@ class Complex {
             });
         }
         
-        const complex = new Complex(vertices);
+        const complex = new Complex();
         
         for(let i = 0; i < distMat.length; i++)
             for(let j = 0; j < i; j++) {
@@ -109,7 +94,7 @@ class Complex {
             const simplices = choose(idxSet, dim + 1).filter( combo => {
                 return new Simplex(combo)
                 .faces
-                .every( face => complex.findSimplex(face) )
+                //.every( face => complex.findIndex(face) ) //
             }) as Simplex[];
             
             simplices.forEach( simplex => complex.add(simplex));

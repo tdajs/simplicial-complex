@@ -35,12 +35,12 @@ export class Simplex extends Array<number> {
         if(this.dim === 0)
             return [];
 
-        let result = new Array<number[]>();
+        let result = new Array<Simplex>();
         for(let i = 0; i <= this.dim; i++) {
             let face = this.slice(0,i);
             if(i < this.dim)
                 face = face.concat(this.slice(i - this.dim));
-            result.push(face);
+            result.push(new Simplex(face));
         }
         return result;
     };

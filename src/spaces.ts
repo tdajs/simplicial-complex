@@ -22,7 +22,7 @@ export class Spaces {
             [{v: [[-15,-5],[-5,-5]], l: "ab"}]
         ];
 
-        const complex = new Complex(vertices)
+        const complex = new Complex()
             .add(new Simplex([0,1,3]))
             .add(new Simplex([1,2,3]))
             .add(new Simplex([2,3,4]))
@@ -42,7 +42,7 @@ export class Spaces {
             { v: [[0,0]], l: "e_3"}
         ];
 
-        const complex = new Complex(vertices)
+        const complex = new Complex()
 
         
         return [complex, [], this.triangles(complex)];
