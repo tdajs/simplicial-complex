@@ -1,5 +1,6 @@
 import { Simplex } from "./simplex";
 import { choose, dist } from "./utils";
+import { NormalForm, changeBasis } from '@tdajs/normal-form';
 
 class Complex {
     simplices: Simplex[][];
@@ -28,11 +29,11 @@ class Complex {
     }
     
     add(simplex: Simplex) {
-        if(Array.isArray(simplex))
-        simplex = new Simplex(simplex);
+        if(!(simplex instanceof Simplex))
+          simplex = new Simplex(simplex);
         
         if(this.findIndex(simplex) !== -1)
-        return this;
+            return this;
         
         if(simplex.dim === 0) {
             const idx = simplex[0];
@@ -100,6 +101,44 @@ class Complex {
             simplices.forEach( simplex => complex.add(simplex));
         }
         return complex; 
+    }
+
+    // remove(simplex: Simplex) {}
+
+    // compute the homology groups
+    ker_basis(dim: number) {
+        const nf = new NormalForm(this.bdMat(dim));
+        const basis = changeBasis(this.simplices[dim].map( s => s.toString()), nf.P);
+        return basis.slice(nf.diag.length);
+    }
+
+    bd_basis(dim: number) {
+        const nf = new NormalForm(this.bdMat(dim + 1));
+        const basis = changeBasis(this.simplices[dim].map( s => s.toString()), nf.Q);
+        return nf.diag.map( (d, idx) => {
+            if(d === 1)
+                return basis[idx];
+            else if(d === -1)
+                return "-(" + basis[idx] + ")";
+            else
+                return d + "(" + basis[idx] + ")";
+        });
+    }
+
+    wbd_basis(dim: number) {
+        const nf = new NormalForm(this.bdMat(dim + 1));
+        const basis = changeBasis(this.simplices[dim].map( s => s.toString()), nf.Q);
+        return basis.slice(0, nf.diag.length);
+
+    }
+
+    betti(dim: number) {
+        return this.ker_basis(dim).length - this.wbd_basis(dim).length;
+    }
+
+    torsion(dim: number) {
+        const nf =  new NormalForm(this.bdMat(dim + 1));
+        return nf.diag.filter( d => d > 1 );
     }
 }
 

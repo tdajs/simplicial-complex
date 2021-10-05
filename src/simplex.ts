@@ -1,4 +1,4 @@
-export class Simplex extends Array<number> {    
+export class Simplex extends Array<number> {
     constructor(vSet: number[]) {        
         if(!vSet || vSet.length === 0)
             throw new Error('vertex set required.');
@@ -51,4 +51,8 @@ export class Simplex extends Array<number> {
             this.length === simplex.length &&
             this.every((val, index) => val === simplex[index]);
     };
+
+    toString() {
+        return "[" + super.toString() + "]";
+    }
 }
