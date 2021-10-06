@@ -68,51 +68,22 @@ class Complex {
         return mat;
     }
 
-    static rips(vertices: number[][], scale: number, distMat: number[][] = Array<number[]>(),  distance?: string) {
-        if(distMat.length === 0) {
-            distMat = Array(vertices.length).fill(0).map( (r,i) => {
-                return Array(vertices.length).fill(0).map( (c,j) => {
-                    return dist(vertices[i], vertices[j]);
-                });
-            });
-        }
-        
-        const complex = new Complex();
-        
-        for(let i = 0; i < distMat.length; i++)
-            for(let j = 0; j < i; j++) {
-                if(distMat[i][j] <= scale) {
-                    complex.add(new Simplex([i,j]));
-                }
-            }
-
-        const idxSet = vertices.map((e,i) => i);
-        let dim = 1;
-        while(dim < complex.n - 1 && complex.simplices[dim] 
-                && complex.simplices[dim].length !== 0) {
-            dim += 1;
-
-            const simplices = choose(idxSet, dim + 1).filter( combo => {
-                return new Simplex(combo)
-                .faces
-                //.every( face => complex.findIndex(face) ) //
-            }) as Simplex[];
-            
-            simplices.forEach( simplex => complex.add(simplex));
-        }
-        return complex; 
-    }
-
     // remove(simplex: Simplex) {}
 
     // compute the homology groups
     ker_basis(dim: number) {
+        if(dim === 0)
+            return this.simplices[0].map(s => s.toString());
+        else if(dim > this.dim)
+            return [];
         const nf = new NormalForm(this.bdMat(dim));
         const basis = changeBasis(this.simplices[dim].map( s => s.toString()), nf.P);
         return basis.slice(nf.diag.length);
     }
 
     bd_basis(dim: number) {
+        if(dim >= this.dim)
+            return [];
         const nf = new NormalForm(this.bdMat(dim + 1));
         const basis = changeBasis(this.simplices[dim].map( s => s.toString()), nf.Q);
         return nf.diag.map( (d, idx) => {
@@ -126,6 +97,8 @@ class Complex {
     }
 
     wbd_basis(dim: number) {
+        if(dim >= this.dim)
+            return [];
         const nf = new NormalForm(this.bdMat(dim + 1));
         const basis = changeBasis(this.simplices[dim].map( s => s.toString()), nf.Q);
         return basis.slice(0, nf.diag.length);
@@ -137,6 +110,8 @@ class Complex {
     }
 
     torsion(dim: number) {
+        if(dim >= this.dim)
+            return []; 
         const nf =  new NormalForm(this.bdMat(dim + 1));
         return nf.diag.filter( d => d > 1 );
     }
