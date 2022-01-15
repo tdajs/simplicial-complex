@@ -26,7 +26,9 @@ export function dist(p1: number[], p2: number[]) {
     return Math.sqrt(dist);
 }
 
-export function rips(vertices: number[][], scale: number, distMat?: number[][]){
+export function rips(vertices: number[][], scale: number, max_dim?: number, distMat?: number[][]){
+    max_dim = max_dim || vertices.length - 1;
+
     if(!distMat) {
         distMat = Array(vertices.length).fill(0).map( (r,i) => {
             return Array(vertices.length).fill(0).map( (c,j) => {
@@ -48,7 +50,7 @@ export function rips(vertices: number[][], scale: number, distMat?: number[][]){
     const idxSet = vertices.map( (e, i) => i);
     let dim = 1;
 
-    while(dim < complex.n - 1 && complex.simplices[dim] 
+    while(dim < max_dim && dim < complex.n - 1 && complex.simplices[dim] 
             && complex.simplices[dim].length !== 0) {
         dim += 1;
 
