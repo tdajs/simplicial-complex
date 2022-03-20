@@ -37,7 +37,7 @@ export function rips(vertices: number[][], scale: number, max_dim?: number){
             && complex.simplices[dim].length !== 0) {
         dim += 1;
 
-        choose(idxSet, dim + 1)
+        combinations(idxSet, dim + 1)
         .filter(combo => diameter(combo.map(idx => vertices[idx])) < scale)
         .forEach(combo => complex.add(new Simplex(combo)));
     }
@@ -45,6 +45,32 @@ export function rips(vertices: number[][], scale: number, max_dim?: number){
 }
 
 export function diameter(set: number[][]) {
-    return choose(set, 2).reduce((prev, current) => 
+    return combinations(set, 2).reduce((prev, current) => 
         Math.max(prev, dist(current[0], current[1])), -Infinity);
+}
+
+export function combinations(set: any[], k: number) {
+    let i, j, head, tailcombs;
+    const combs: any[][] = [];
+
+    if (k > set.length || k <= 0) {
+	return [];
+    }
+    if (k == set.length) {
+	return [set];
+    }
+    if (k == 1) {
+	for (i = 0; i < set.length; i++) {
+	    combs.push([set[i]]);
+	}
+	return combs;
+    }
+    for (i = 0; i < set.length - k + 1; i++) {
+	head = set.slice(i, i + 1);
+	tailcombs = combinations(set.slice(i + 1), k - 1);
+	for (j = 0; j < tailcombs.length; j++) {
+	    combs.push(head.concat(tailcombs[j]));
+	}
+    }
+    return combs;
 }
