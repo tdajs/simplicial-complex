@@ -1,6 +1,6 @@
 {
   "name": "@tdajs/simplicial-complex",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "JS package to manipulate simplicial complexes",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
